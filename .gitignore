@@ -1,0 +1,25 @@
+# Logs
+*.log
+
+# SSH Keys
+*.pem
+ssh_key.pem
+
+# Laravel
+/vendor/
+/node_modules/
+.env
+.env.backup
+.phpunit.result.cache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+.vagrant/

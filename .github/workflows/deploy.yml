@@ -1,0 +1,29 @@
+name: Deploy Backend Application
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6.0.0
+
+      - name: Create SSH Key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > backend_ssh_key
+          chmod 600 backend_ssh_key
+
+      - name: Deploy with Ansible
+        run: |
+          cd ansible
+          ansible-playbook -i inventory.ini playbook.yml
+
+      - name: Cleanup
+        if: always()
+        run: rm -f backend_ssh_key

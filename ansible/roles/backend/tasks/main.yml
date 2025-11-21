@@ -1,0 +1,123 @@
+---
+
+- name: Install Stack
+  apt:
+    name:
+      - nginx
+      - php8.1-fpm
+      - php8.1-cli
+      - php8.1-mysql
+      - php8.1-zip
+      - php8.1-gd
+      - php8.1-mbstring
+      - php8.1-curl
+      - php8.1-xml
+      - php8.1-bcmath
+      - unzip
+      - git
+      - acl
+    state: present
+    update_cache: true
+
+
+- name: Install Composer
+  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  args:
+    creates: /usr/local/bin/composer
+
+
+- name: Create Dir
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Remove Existing App Dir
+  file:
+    path: "{{ app_dir }}"
+    state: absent
+
+- name: Clone Repo
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ app_dir }}"
+    version: main
+    update: no
+  become: yes
+
+- name: Fix Perms
+  file:
+    path: "{{ app_dir }}"
+    owner: www-data
+    group: www-data
+    recurse: yes
+
+- name: Install Deps
+  command: composer install --no-interaction --prefer-dist --optimize-autoloader
+  args:
+    chdir: "{{ app_dir }}"
+  become: yes
+  become_user: www-data
+
+
+- name: Setup .env
+  copy:
+    src: "{{ app_dir }}/.env.example"
+    dest: "{{ app_dir }}/.env"
+    remote_src: yes
+    owner: www-data
+    group: www-data
+    force: no
+
+- name: Generate Key
+  shell: grep -q "APP_KEY=base64" .env || php artisan key:generate
+  args:
+    chdir: "{{ app_dir }}"
+  become: yes
+  become_user: www-data
+
+
+
+
+- name: Writable Dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0775'
+    recurse: yes
+  loop:
+    - "{{ app_dir }}/storage"
+    - "{{ app_dir }}/bootstrap/cache"
+
+- name: Clean Nginx
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Restart Nginx
+
+- name: Config Nginx
+  template:
+    src: laravel.conf.j2
+    dest: /etc/nginx/sites-available/laravel
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Nginx
+
+- name: Enable Site
+  file:
+    src: /etc/nginx/sites-available/laravel
+    dest: /etc/nginx/sites-enabled/laravel
+    state: link
+  notify: Restart Nginx
+
+- name: Migrate DB
+  command: php artisan migrate --force
+  args:
+    chdir: "{{ app_dir }}"
+  become: yes
+  become_user: www-data
