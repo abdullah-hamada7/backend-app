@@ -1,18 +1,32 @@
 ---
 
+- name: Install Prerequisites
+  apt:
+    name:
+      - software-properties-common
+      - python3-launchpadlib
+    state: present
+    update_cache: yes
+
+- name: Add PHP PPA
+  apt_repository:
+    repo: ppa:ondrej/php
+    state: present
+    update_cache: yes
+
 - name: Install Stack
   apt:
     name:
       - nginx
-      - php8.1-fpm
-      - php8.1-cli
-      - php8.1-mysql
-      - php8.1-zip
-      - php8.1-gd
-      - php8.1-mbstring
-      - php8.1-curl
-      - php8.1-xml
-      - php8.1-bcmath
+      - "php{{ php_version }}-fpm"
+      - "php{{ php_version }}-cli"
+      - "php{{ php_version }}-mysql"
+      - "php{{ php_version }}-zip"
+      - "php{{ php_version }}-gd"
+      - "php{{ php_version }}-mbstring"
+      - "php{{ php_version }}-curl"
+      - "php{{ php_version }}-xml"
+      - "php{{ php_version }}-bcmath"
       - unzip
       - git
       - acl
@@ -55,7 +69,7 @@
     recurse: yes
 
 - name: Install Deps
-  command: composer install --no-interaction --prefer-dist --optimize-autoloader
+  command: composer install --no-interaction --prefer-dist --optimize-autoloader --no-cache
   args:
     chdir: "{{ app_dir }}"
   become: yes
