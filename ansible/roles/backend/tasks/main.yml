@@ -62,7 +62,7 @@
     repo: "{{ repo_url }}"
     dest: "{{ app_dir }}"
     version: "{{ repo_branch }}"
-    update: no
+    update: yes
   become: yes
 
 - name: Fix Perms

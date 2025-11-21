@@ -24,6 +24,10 @@ The task asked for a shell script, but I used **Ansible** instead.
 
 I did this because shell scripts can break easily if you run them more than once or if something unexpected happens. Ansible is safer—it checks if something is already done before trying to do it again. It's also the standard way to manage servers professionally.
 
+### 4. Using Nginx
+
+I used **Nginx** as the web server. It's a high-performance web server that is standard for serving PHP applications. It handles incoming HTTP requests, serves static files (like images and CSS) efficiently, and passes dynamic PHP requests to PHP-FPM to be processed by Laravel.
+
 ---
 
 ## Quick Start
