@@ -43,7 +43,7 @@
   git:
     repo: "{{ repo_url }}"
     dest: "{{ app_dir }}"
-    version: main
+    version: "{{ repo_branch }}"
     update: no
   become: yes
 

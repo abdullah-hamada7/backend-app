@@ -1,4 +1,5 @@
 ---
 app_dir: "/var/www/html/laravel"
 repo_url: "https://github.com/abdullah-hamada7/laravel.git"
+repo_branch: "12.x"
 php_version: "8.1"
